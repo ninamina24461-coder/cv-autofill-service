@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: cv-autofill-service
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DEFAULT_PHONE_REGION
+        value: ZA
+      - key: MAX_TEXT_CHARS
+        value: 80000
+      - key: ENABLE_OCR
+        value: false
+      - key: PYTHON_VERSION
+        value: 3.12.0
