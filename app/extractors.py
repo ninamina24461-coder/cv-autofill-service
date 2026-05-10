@@ -5,10 +5,25 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
 
-import pdfplumber
-from docx import Document
-
 from .utils import clean_text
+
+# Lazy loading for heavy dependencies
+_pdfplumber = None
+_docx = None
+
+def get_pdfplumber():
+    global _pdfplumber
+    if _pdfplumber is None:
+        import pdfplumber
+        _pdfplumber = pdfplumber
+    return _pdfplumber
+
+def get_docx():
+    global _docx
+    if _docx is None:
+        from docx import Document
+        _docx = Document
+    return _docx
 
 
 @dataclass
@@ -49,6 +64,7 @@ def _from_pdf(content: bytes):
         tmp_path = tmp.name
     
     try:
+        pdfplumber = get_pdfplumber()
         with pdfplumber.open(tmp_path) as pdf:
             for page in pdf.pages:
                 txt = page.extract_text() or ""
@@ -72,6 +88,7 @@ def _from_docx(content: bytes) -> str:
             tmp.flush()
             tmp_path = tmp.name
         
+        Document = get_docx()
         doc = Document(tmp_path)
         parts: List[str] = []
         for p in doc.paragraphs:
